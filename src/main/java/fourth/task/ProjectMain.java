@@ -39,24 +39,69 @@ public class ProjectMain {
         List<Person> removePersonList = createRemoveList(personList);
         LocalDate startDate = personList.get(0).getBeginDate();
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        LocalDate tempDateToAdd;
+        LocalDate tempDateToRemove;
 
-        for (int i = 1; i < personList.size(); i++) {
-            //if (personList.get(i).getEndDate() == null){
-                LocalDate tempDateToAdd = personList.get(i).getBeginDate();
+        int i = 1;
+        while(i < personList.size() || !removePersonList.isEmpty()){
+            tempDateToRemove = removePersonList.get(0).getEndDate();
+            if (i == personList.size()){
+                while (!removePersonList.isEmpty()){
+                    tempDateToRemove = removePersonList.get(0).getEndDate();
+                    if (tempDateToRemove.equals(startDate)) {
+                        personList.remove(removePersonList.get(0));
+                        removePersonList.remove(0);
+                    }
+                    else if (tempDateToRemove.isAfter(startDate) && tempDateToRemove.isBefore(endDate.plusDays(1))) {
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, personList.size())), startDate, tempDateToRemove.minusDays(1)));
+                        startDate = tempDateToRemove;
+                        personList.remove(removePersonList.get(0));
+                        removePersonList.remove(0);
+                    } else {
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, personList.size())), startDate, endDate));
+                        startDate = endDate.plusDays(1);
+                        endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+                    }
+                }
+                break;
+            }
 
-                if (tempDateToAdd.equals(startDate))
-                    continue;
-                if (tempDateToAdd.isAfter(startDate) && tempDateToAdd.isBefore(endDate.plusDays(1))){
+            tempDateToAdd = personList.get(i).getBeginDate();
+
+            if (tempDateToAdd.isBefore(tempDateToRemove)) {
+                if (tempDateToAdd.equals(startDate)) {
+                    i++;
+                }
+                else if (tempDateToAdd.isAfter(startDate) && tempDateToAdd.isBefore(endDate.plusDays(1))) {
                     periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, tempDateToAdd.minusDays(1)));
                     startDate = tempDateToAdd;
-                }
-                else{
+                    i++;
+                } else {
                     periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
                     startDate = endDate.plusDays(1);
                     endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+                }
+            }
+            else {
+                if (tempDateToRemove.equals(startDate)){
+                    i--;
+                    personList.remove(removePersonList.get(0));
+                    removePersonList.remove(0);
+                    continue;
+                }
+                if (tempDateToRemove.isAfter(startDate) && tempDateToRemove.isBefore(endDate.plusDays(1))) {
+                    periodList.add(new Period(tempDateToRemove.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, tempDateToRemove.minusDays(1)));
+                    personList.remove(removePersonList.get(0));
+                    removePersonList.remove(0);
+                    startDate = tempDateToRemove;
                     i--;
                 }
-            //}
+                else {
+                    periodList.add(new Period(tempDateToRemove.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
+                    startDate = endDate.plusDays(1);
+                    endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+                }
+            }
         }
         periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, personList.size())), startDate));
         return periodList;
