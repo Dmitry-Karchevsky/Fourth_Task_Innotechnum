@@ -1,6 +1,5 @@
 package fourth.task;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class ProjectMain {
@@ -12,7 +11,5 @@ public class ProjectMain {
 
         WriteInFile.writeAboutMonths("src\\main\\resources\\OutInfoAboutMonth.txt", periodList);
         WriteInFile.writeAboutStages("src\\main\\resources\\OutInfoAboutStages.txt", stagesList, periodList);
-
-        System.out.println(periodList);
     }
 }

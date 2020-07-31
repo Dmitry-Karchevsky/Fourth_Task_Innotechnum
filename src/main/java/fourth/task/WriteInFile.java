@@ -70,15 +70,19 @@ public class WriteInFile {
         {
             StringBuilder stringBuilder = new StringBuilder("Название\t|\tСумма этапа\t|\tПлановый срок завершения\t|\tФактический срок\t|\tРасхождение\n");
             BigDecimal sum = new BigDecimal(0);
-            LocalDate end;
-            int i = 0, j = 0;
-            while (i != listStage.size()){
-                if (listStage.get(i).getBudget().compareTo(sum) < 0){
-                    stringBuilder.append(infoNewStage(listStage.get(i), Period.getDayBudgetEnd(listPeriod.get(j), sum.subtract(listStage.get(i).getBudget()))));
-                    i++;
+            BigDecimal budget = listStage.get(0).getBudget();
+            int stageIndex = 0;
+            int peridIndex = 0;
+            while (stageIndex != listStage.size()){
+                if (budget.compareTo(sum) < 0){
+                    stringBuilder.append(infoNewStage(listStage.get(stageIndex), Period.getDayBudgetEnd(listPeriod.get(peridIndex - 1), sum.subtract(budget))));
+                    stageIndex++;
+                    if (stageIndex != listStage.size())
+                        budget = budget.add(listStage.get(stageIndex).getBudget());
                 }
-                sum = sum.add(listPeriod.get(j).getAllSalaryInPeriod());
-                j++;
+                if (peridIndex != listPeriod.size())
+                    sum = sum.add(listPeriod.get(peridIndex).getAllSalaryInPeriod());
+                peridIndex++;
             }
             writer.write(stringBuilder.toString());
             writer.flush();

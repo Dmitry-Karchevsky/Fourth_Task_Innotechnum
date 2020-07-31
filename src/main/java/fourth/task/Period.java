@@ -9,12 +9,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class Period {
-    private Month month;
-    private BigDecimal allSalaryInDay;
-    private BigDecimal allSalaryInPeriod;
-    private LocalDate startPeriod;
-    private LocalDate endPeriod;
-    private int countOfWorkingDays;
+    private final Month month;
+    private final BigDecimal allSalaryInDay;
+    private final BigDecimal allSalaryInPeriod;
+    private final LocalDate startPeriod;
+    private final LocalDate endPeriod;
+    private final int countOfWorkingDays;
 
     private static BigDecimal allPeriodsSum = new BigDecimal(0);
 
@@ -28,26 +28,32 @@ public class Period {
         allPeriodsSum = allPeriodsSum.add(allSalaryInPeriod);
     }
 
-    public static int calculateWorkingDays(LocalDate startDate, LocalDate endDate){
-        int workingDays = 0;
-        boolean isMinus = false;
-        if (startDate.isAfter(endDate)){
-            LocalDate temp = startDate;
-            startDate = endDate;
-            endDate = temp;
-            isMinus = true;
-        }
+    public Month getMonth() {
+        return month;
+    }
 
-        while (!startDate.isAfter(endDate)){
-            if (!startDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)
-                    && !startDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)
-                    && !Holidays.isHoliday(startDate))
-                workingDays++;
-            startDate = startDate.plusDays(1);
-        }
-        if (isMinus)
-            return -workingDays;
-        return workingDays;
+    public BigDecimal getAllSalaryInDay() {
+        return allSalaryInDay;
+    }
+
+    public LocalDate getStartPeriod() {
+        return startPeriod;
+    }
+
+    public LocalDate getEndPeriod() {
+        return endPeriod;
+    }
+
+    public int getCountOfWorkingDays() {
+        return countOfWorkingDays;
+    }
+
+    public BigDecimal getAllSalaryInPeriod() {
+        return allSalaryInPeriod;
+    }
+
+    public static BigDecimal getAllPeriodsSum() {
+        return allPeriodsSum;
     }
 
     private static BigDecimal getSalaryFromList(List<Person> personList){
@@ -68,17 +74,36 @@ public class Period {
         return removeList;
     }
 
+    public static int calculateWorkingDays(LocalDate startDate, LocalDate endDate){
+        int workingDays = 0;
+        boolean isMinus = false;
+        if (startDate.isAfter(endDate)){
+            LocalDate temp = startDate;
+            startDate = endDate;
+            endDate = temp;
+            isMinus = true;
+        }
+        while (!startDate.isAfter(endDate)){
+            if (!startDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)
+                    && !startDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)
+                    && !Holidays.isHoliday(startDate))
+                workingDays++;
+            startDate = startDate.plusDays(1);
+        }
+        if (isMinus)
+            return -workingDays;
+        return workingDays;
+    }
+
     public static LocalDate getDayBudgetEnd(Period period, BigDecimal budget){
         LocalDate end = period.getEndPeriod();
-        while(budget.compareTo(period.getAllSalaryInDay()) > 0){
+        while(budget.compareTo(period.getAllSalaryInDay()) >= 0){
             if (!end.getDayOfWeek().equals(DayOfWeek.SATURDAY)
                     && !end.getDayOfWeek().equals(DayOfWeek.SUNDAY)
                     && !Holidays.isHoliday(end))
                 budget = budget.subtract(period.getAllSalaryInDay());
             end = end.minusDays(1);
         }
-        if (budget.equals(new BigDecimal(0)))//ПОЧЕМУ НЕ УМЕНЬШАЕТСЯ???
-            end = end.minusDays(1);
         while (end.getDayOfWeek().equals(DayOfWeek.SATURDAY)
                 || end.getDayOfWeek().equals(DayOfWeek.SUNDAY)
                 || Holidays.isHoliday(end))
@@ -96,8 +121,9 @@ public class Period {
         LocalDate tempDateToRemove;
 
         int i = 1;
+        // Выполняется пока есть деньги в бюджете из всех этапов
         while(i < personList.size() || !removePersonList.isEmpty() || getAllPeriodsSum().compareTo(budget) < 0) {
-            System.out.println(getAllPeriodsSum());
+            // Если всех работников добавили, но не все уволились с проекта
             if (i == personList.size() && !removePersonList.isEmpty() && getAllPeriodsSum().compareTo(budget) < 0) {
                 tempDateToRemove = removePersonList.get(0).getEndDate();
                 if (tempDateToRemove.equals(startDate)) {
@@ -115,7 +141,9 @@ public class Period {
                     startDate = endDate.plusDays(1);
                     endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
                 }
-            } else if (i < personList.size() && getAllPeriodsSum().compareTo(budget) < 0){
+            }
+            // Если есть работники, которых нужно добавить
+            else if (i < personList.size() && getAllPeriodsSum().compareTo(budget) < 0){
                 tempDateToAdd = personList.get(i).getBeginDate();
                 tempDateToRemove = removePersonList.get(0).getEndDate();
                 if (tempDateToAdd.isBefore(tempDateToRemove)) {
@@ -148,13 +176,14 @@ public class Period {
                     }
                 }
             }
+            // Если работники работают, но деньги в бюджете еще есть (не все этапы закончены)
             else if (getAllPeriodsSum().compareTo(budget) < 0){
                 periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, personList.size())), startDate, endDate));
                 startDate = endDate.plusDays(1);
                 endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
             }
 
-            // тут смотреть бюджет
+            // Тут смотреть бюджет
             if (getAllPeriodsSum().compareTo(budget) > 0){
                 LocalDate endBudget = getDayBudgetEnd(periodList.get(periodList.size() - 1), getAllPeriodsSum().subtract(budget));
                 Period tempPeriod = periodList.get(periodList.size() - 1);
@@ -163,36 +192,7 @@ public class Period {
                 break;
             }
         }
-
         return periodList;
-    }
-
-    public Month getMonth() {
-        return month;
-    }
-
-    public BigDecimal getAllSalaryInDay() {
-        return allSalaryInDay;
-    }
-
-    public LocalDate getStartPeriod() {
-        return startPeriod;
-    }
-
-    public LocalDate getEndPeriod() {
-        return endPeriod;
-    }
-
-    public int getCountOfWorkingDays() {
-        return countOfWorkingDays;
-    }
-
-    public BigDecimal getAllSalaryInPeriod() {
-        return allSalaryInPeriod;
-    }
-
-    public static BigDecimal getAllPeriodsSum() {
-        return allPeriodsSum;
     }
 
     @Override

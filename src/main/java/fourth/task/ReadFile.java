@@ -37,10 +37,8 @@ public class ReadFile {
             }
         } catch (FileNotFoundException e) {
             System.out.printf("Файл для считывания данных: %s не найден\n", fileName);
-            return null;
         } catch (IOException e) {
             System.out.printf("Ошибка при чтении данных из файла: %s\n", fileName);
-            return null;
         }
         return list;
     }
@@ -57,10 +55,8 @@ public class ReadFile {
             }
         } catch (FileNotFoundException e) {
             System.out.printf("Файл для считывания данных: %s не найден\n", fileName);
-            return null;
         } catch (IOException e) {
             System.out.printf("Ошибка при чтении данных из файла: %s\n", fileName);
-            return null;
         }
         return list;
     }

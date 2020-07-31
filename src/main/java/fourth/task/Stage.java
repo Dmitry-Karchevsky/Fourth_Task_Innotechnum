@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Stage {
-    private String name;
-    private BigDecimal budget;
-    private LocalDate endStageDate;
+    private final String name;
+    private final BigDecimal budget;
+    private final LocalDate endStageDate;
 
     private static BigDecimal allStagesBudget = new BigDecimal(0);
 

@@ -6,26 +6,29 @@ import java.util.Comparator;
 import java.util.Objects;
 
 public class Person implements Comparable<Person>{
-    private String name;
-    private BigDecimal salaryInDay;
-    private LocalDate beginDate;
+    private static int idCounter = 0;
+
+    private final int id;
+    private final String name;
+    private final BigDecimal salaryInDay;
+    private final LocalDate beginDate;
     private LocalDate endDate;
 
     public Person(String name, BigDecimal salaryInDay, LocalDate beginDate) {
+        idCounter++;
         this.name = name;
         this.salaryInDay = salaryInDay;
         this.beginDate = beginDate;
+        this.id = idCounter;
     }
 
     public Person(String name, BigDecimal salaryInDay, LocalDate beginDate, LocalDate endDate) {
+        idCounter++;
         this.name = name;
         this.salaryInDay = salaryInDay;
         this.beginDate = beginDate;
         this.endDate = endDate;
-    }
-
-    public String getName() {
-        return name;
+        this.id = idCounter;
     }
 
     public BigDecimal getSalaryInDay() {
@@ -41,21 +44,12 @@ public class Person implements Comparable<Person>{
     }
 
     @Override
-    public String toString() {
-        return "Person{" +
-                "name='" + name + '\'' +
-                ", salaryInDay=" + salaryInDay +
-                ", beginDate=" + beginDate +
-                ", endDate=" + endDate +
-                '}' + "\n";
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return Objects.equals(name, person.name) &&
+        return id == person.id &&
+                Objects.equals(name, person.name) &&
                 Objects.equals(salaryInDay, person.salaryInDay) &&
                 Objects.equals(beginDate, person.beginDate) &&
                 Objects.equals(endDate, person.endDate);
@@ -63,7 +57,7 @@ public class Person implements Comparable<Person>{
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, salaryInDay, beginDate, endDate);
+        return Objects.hash(id, name, salaryInDay, beginDate, endDate);
     }
 
     @Override
@@ -85,5 +79,15 @@ public class Person implements Comparable<Person>{
                 return o1.endDate.compareTo(o2.endDate);
             }
         };
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", salaryInDay=" + salaryInDay +
+                ", beginDate=" + beginDate +
+                ", endDate=" + endDate +
+                '}' + "\n";
     }
 }
