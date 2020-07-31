@@ -28,14 +28,16 @@ public class Period {
         allPeriodsSum = allPeriodsSum.add(allSalaryInPeriod);
     }
 
-    public Period(Month month, BigDecimal allSalaryInDay, LocalDate startPeriod) {
-        this.month = month;
-        this.allSalaryInDay = allSalaryInDay;
-        this.startPeriod = startPeriod;
-    }
-
-    public int calculateWorkingDays(LocalDate startDate, LocalDate endDate){
+    public static int calculateWorkingDays(LocalDate startDate, LocalDate endDate){
         int workingDays = 0;
+        boolean isMinus = false;
+        if (startDate.isAfter(endDate)){
+            LocalDate temp = startDate;
+            startDate = endDate;
+            endDate = temp;
+            isMinus = true;
+        }
+
         while (!startDate.isAfter(endDate)){
             if (!startDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)
                     && !startDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)
@@ -43,6 +45,8 @@ public class Period {
                 workingDays++;
             startDate = startDate.plusDays(1);
         }
+        if (isMinus)
+            return -workingDays;
         return workingDays;
     }
 
@@ -64,13 +68,22 @@ public class Period {
         return removeList;
     }
 
-    private static LocalDate getDayBudgetEnd(Period period, BigDecimal budget){
+    public static LocalDate getDayBudgetEnd(Period period, BigDecimal budget){
         LocalDate end = period.getEndPeriod();
         while(budget.compareTo(period.getAllSalaryInDay()) > 0){
-            budget = budget.subtract(period.getAllSalaryInDay());
+            if (!end.getDayOfWeek().equals(DayOfWeek.SATURDAY)
+                    && !end.getDayOfWeek().equals(DayOfWeek.SUNDAY)
+                    && !Holidays.isHoliday(end))
+                budget = budget.subtract(period.getAllSalaryInDay());
             end = end.minusDays(1);
         }
-        return end.plusDays(1);
+        if (budget.equals(new BigDecimal(0)))//ПОЧЕМУ НЕ УМЕНЬШАЕТСЯ???
+            end = end.minusDays(1);
+        while (end.getDayOfWeek().equals(DayOfWeek.SATURDAY)
+                || end.getDayOfWeek().equals(DayOfWeek.SUNDAY)
+                || Holidays.isHoliday(end))
+            end = end.minusDays(1);
+        return end;
     }
 
     public static List<Period> createPeriodsList(List<Person> personList, BigDecimal budget){
@@ -147,6 +160,7 @@ public class Period {
                 Period tempPeriod = periodList.get(periodList.size() - 1);
                 periodList.remove(periodList.size() - 1);
                 periodList.add(new Period(tempPeriod.getMonth(), tempPeriod.getAllSalaryInDay(), tempPeriod.getStartPeriod(), endBudget));
+                break;
             }
         }
 
