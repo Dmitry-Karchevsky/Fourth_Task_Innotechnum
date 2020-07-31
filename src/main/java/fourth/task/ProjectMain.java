@@ -5,10 +5,13 @@ import java.util.List;
 
 public class ProjectMain {
     public static void main(String[] args) {
-        List<Person> list = ReadFile.readPersonsInfoInList("src\\main\\resources\\PersonsInfo.txt");
-        List<Stage> list2 = ReadFile.readStagesInfoInList("src\\main\\resources\\StagesInfo.txt");
-        //System.out.println(list);
-        List<Period> periodList = Period.createPeriodsList(list, new BigDecimal(1500000));
+        List<Person> personList = ReadFile.readPersonsInfoInList("src\\main\\resources\\PersonsInfo.txt");
+        List<Stage> stagesList = ReadFile.readStagesInfoInList("src\\main\\resources\\StagesInfo.txt");
+
+        List<Period> periodList = Period.createPeriodsList(personList, Stage.getAllStagesBudget());
+
+        WriteInFile.writeAboutMonths("src\\main\\resources\\OutInfoAboutMonth.txt", periodList);
+        WriteInFile.writeAboutStages("src\\main\\resources\\OutInfoAboutStages.txt", stagesList, periodList);
 
         System.out.println(periodList);
     }

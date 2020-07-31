@@ -12,20 +12,35 @@ public class WriteInFile {
         stringBuilder.append(dateInfo.getMonth())
                 .append(".")
                 .append(dateInfo.getYear())
-                .append("\t")
+                .append("\t|\t")
                 .append(money)
-                .append("\t")
+                .append("\t|\t")
                 .append(allMoney)
-                .append("\t")
+                .append("\t|\t")
                 .append(days)
                 .append("\n");
         return stringBuilder.toString();
     }
 
-    public static void writeAboutMonths(String fileName, List<Period> listPeriod, BigDecimal budget) {
+    private static String infoNewStage(Stage stageInfo,  LocalDate endDate){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(stageInfo.getName())
+                .append("\t|\t")
+                .append(stageInfo.getBudget())
+                .append("\t|\t")
+                .append(stageInfo.getEndStageDate())
+                .append("\t|\t")
+                .append(endDate)
+                .append("\t|\t")
+                .append(Period.calculateWorkingDays(stageInfo.getEndStageDate(), endDate))
+                .append("\n");
+        return stringBuilder.toString();
+    }
+
+    public static void writeAboutMonths(String fileName, List<Period> listPeriod) {
         try(FileWriter writer = new FileWriter(fileName, false))
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder("Месяц\t|\tСумма\t|\tСумма накопительно\t|\tКол-во рабочих дней\n");
             BigDecimal sum = new BigDecimal(0);
             BigDecimal monthSum;
             int workingDaysSum;
@@ -35,16 +50,13 @@ public class WriteInFile {
                 monthSum = new BigDecimal(0);
                 workingDaysSum = 0;
                 tempDate = listPeriod.get(i).getStartPeriod();
-                //ПОСМОТРЕТЬ УСЛОВИЕ
                 while (i != listPeriod.size() && tempDate.getMonth().equals(listPeriod.get(i).getMonth())) {
                     workingDaysSum += listPeriod.get(i).getCountOfWorkingDays();
-                    monthSum = listPeriod.get(i).getAllSalaryInPeriod();
+                    monthSum = monthSum.add(listPeriod.get(i).getAllSalaryInPeriod());
                     i++;
                 }
-
                 sum = sum.add(monthSum);
-                //stringBuilder.append(infoNewMonth(tempDate, monthSum, sum, workingDaysSum));
-                budget = budget.subtract(sum);
+                stringBuilder.append(infoNewMonth(tempDate, monthSum, sum, workingDaysSum));
             }
             writer.write(stringBuilder.toString());
             writer.flush();
@@ -53,10 +65,22 @@ public class WriteInFile {
         }
     }
 
-    public static void writeAboutStages(String fileName, List<String> list) {
+    public static void writeAboutStages(String fileName, List<Stage> listStage, List<Period> listPeriod) {
         try(FileWriter writer = new FileWriter(fileName, false))
         {
-
+            StringBuilder stringBuilder = new StringBuilder("Название\t|\tСумма этапа\t|\tПлановый срок завершения\t|\tФактический срок\t|\tРасхождение\n");
+            BigDecimal sum = new BigDecimal(0);
+            LocalDate end;
+            int i = 0, j = 0;
+            while (i != listStage.size()){
+                if (listStage.get(i).getBudget().compareTo(sum) < 0){
+                    stringBuilder.append(infoNewStage(listStage.get(i), Period.getDayBudgetEnd(listPeriod.get(j), sum.subtract(listStage.get(i).getBudget()))));
+                    i++;
+                }
+                sum = sum.add(listPeriod.get(j).getAllSalaryInPeriod());
+                j++;
+            }
+            writer.write(stringBuilder.toString());
             writer.flush();
         } catch (IOException e) {
             System.out.printf("Недопустимое имя файла для вывода: %s\n", fileName);
