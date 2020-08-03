@@ -7,8 +7,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class PeriodTest {
 
     @Test

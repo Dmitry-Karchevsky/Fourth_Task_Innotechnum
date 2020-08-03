@@ -121,8 +121,8 @@ public class Period {
         LocalDate tempDateToRemove;
 
         int i = 1;
-        // Выполняется пока есть деньги в бюджете из всех этапов
-        while(i < personList.size() || !removePersonList.isEmpty() || getAllPeriodsSum().compareTo(budget) < 0) {
+        // Выполняется пока есть деньги в бюджете, по сравнению с суммой всех денег за периоды
+        while(getAllPeriodsSum().compareTo(budget) < 0) {
             // Если всех работников добавили, но не все уволились с проекта
             if (i == personList.size() && !removePersonList.isEmpty() && getAllPeriodsSum().compareTo(budget) < 0) {
                 tempDateToRemove = removePersonList.get(0).getEndDate();
@@ -170,7 +170,7 @@ public class Period {
                         startDate = tempDateToRemove;
                         i--;
                     } else {
-                        periodList.add(new Period(tempDateToRemove.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
                         startDate = endDate.plusDays(1);
                         endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
                     }
@@ -189,7 +189,6 @@ public class Period {
                 Period tempPeriod = periodList.get(periodList.size() - 1);
                 periodList.remove(periodList.size() - 1);
                 periodList.add(new Period(tempPeriod.getMonth(), tempPeriod.getAllSalaryInDay(), tempPeriod.getStartPeriod(), endBudget));
-                break;
             }
         }
         return periodList;
