@@ -9,6 +9,8 @@ public class ProjectMain {
 
         List<Period> periodList = Period.createPeriodsList(personList, Stage.getAllStagesBudget());
 
+        System.out.println(periodList);
+
         WriteInFile.writeAboutMonths("src\\main\\resources\\OutInfoAboutMonth.txt", periodList);
         WriteInFile.writeAboutStages("src\\main\\resources\\OutInfoAboutStages.txt", stagesList, periodList);
     }

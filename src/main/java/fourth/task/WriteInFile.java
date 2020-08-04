@@ -74,7 +74,7 @@ public class WriteInFile {
             int stageIndex = 0;
             int peridIndex = 0;
             while (stageIndex != listStage.size()){
-                if (budget.compareTo(sum) < 0){
+                if (budget.compareTo(sum) <= 0){
                     stringBuilder.append(infoNewStage(listStage.get(stageIndex), Period.getDayBudgetEnd(listPeriod.get(peridIndex - 1), sum.subtract(budget))));
                     stageIndex++;
                     if (stageIndex != listStage.size())

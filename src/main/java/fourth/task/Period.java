@@ -111,16 +111,55 @@ public class Period {
         return end;
     }
 
-    public static List<Period> createPeriodsList(List<Person> personList, BigDecimal budget){
-        Collections.sort(personList);
+    private static List<Period> addPeriodWithOutRemove(List<Person> personList, BigDecimal budget){
         List<Period> periodList = new ArrayList<>();
-        List<Person> removePersonList = createRemoveList(personList);
+        LocalDate startDate = personList.get(0).getBeginDate();
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        LocalDate tempDateToAdd;
+
+        int i = 0;
+        while(getAllPeriodsSum().compareTo(budget) < 0) {
+            if (i < personList.size() && getAllPeriodsSum().compareTo(budget) < 0){
+                tempDateToAdd = personList.get(i).getBeginDate();
+                // Если есть работники, которых нужно добавить
+                if (tempDateToAdd.equals(startDate)) {
+                    i++;
+                } else if (tempDateToAdd.isAfter(startDate) && tempDateToAdd.isBefore(endDate.plusDays(1))) {
+                    periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, tempDateToAdd.minusDays(1)));
+                    startDate = tempDateToAdd;
+                    i++;
+                } else {
+                    periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, endDate));
+                    startDate = endDate.plusDays(1);
+                    endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+                }
+            }
+            // Если работники работают, но деньги в бюджете еще есть (не все этапы закончены)
+            else if (getAllPeriodsSum().compareTo(budget) < 0){
+                periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, personList.size())), startDate, endDate));
+                startDate = endDate.plusDays(1);
+                endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            }
+
+            // Тут смотреть бюджет
+            if (getAllPeriodsSum().compareTo(budget) > 0){
+                LocalDate endBudget = getDayBudgetEnd(periodList.get(periodList.size() - 1), getAllPeriodsSum().subtract(budget));
+                Period tempPeriod = periodList.get(periodList.size() - 1);
+                periodList.remove(periodList.size() - 1);
+                periodList.add(new Period(tempPeriod.getMonth(), tempPeriod.getAllSalaryInDay(), tempPeriod.getStartPeriod(), endBudget));
+            }
+        }
+        return periodList;
+    }
+
+    private static List<Period> addPeriodWithRemove(List<Person> personList, BigDecimal budget, List<Person> removePersonList){
+        List<Period> periodList = new ArrayList<>();
         LocalDate startDate = personList.get(0).getBeginDate();
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
         LocalDate tempDateToAdd;
         LocalDate tempDateToRemove;
 
-        int i = 1;
+        int i = 0;
         // Выполняется пока есть деньги в бюджете, по сравнению с суммой всех денег за периоды
         while(getAllPeriodsSum().compareTo(budget) < 0) {
             // Если всех работников добавили, но не все уволились с проекта
@@ -150,11 +189,11 @@ public class Period {
                     if (tempDateToAdd.equals(startDate)) {
                         i++;
                     } else if (tempDateToAdd.isAfter(startDate) && tempDateToAdd.isBefore(endDate.plusDays(1))) {
-                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, tempDateToAdd.minusDays(1)));
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, tempDateToAdd.minusDays(1)));
                         startDate = tempDateToAdd;
                         i++;
                     } else {
-                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, endDate));
                         startDate = endDate.plusDays(1);
                         endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
                     }
@@ -164,13 +203,13 @@ public class Period {
                         removePersonList.remove(0);
                         i--;
                     } else if (tempDateToRemove.isAfter(startDate) && tempDateToRemove.isBefore(endDate.plusDays(1))) {
-                        periodList.add(new Period(tempDateToRemove.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, tempDateToRemove.minusDays(1)));
+                        periodList.add(new Period(tempDateToRemove.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, tempDateToRemove.minusDays(1)));
                         personList.remove(removePersonList.get(0));
                         removePersonList.remove(0);
                         startDate = tempDateToRemove;
                         i--;
                     } else {
-                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, endDate));
                         startDate = endDate.plusDays(1);
                         endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
                     }
@@ -191,6 +230,18 @@ public class Period {
                 periodList.add(new Period(tempPeriod.getMonth(), tempPeriod.getAllSalaryInDay(), tempPeriod.getStartPeriod(), endBudget));
             }
         }
+        return periodList;
+    }
+
+    public static List<Period> createPeriodsList(List<Person> personList, BigDecimal budget){
+        Collections.sort(personList);
+        List<Person> removePersonList = createRemoveList(personList);
+        List<Period> periodList;
+
+        if (removePersonList.isEmpty())
+            periodList = addPeriodWithOutRemove(personList, budget);
+        else
+            periodList = addPeriodWithRemove(personList, budget, removePersonList);
         return periodList;
     }
 
