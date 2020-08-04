@@ -193,7 +193,7 @@ public class Period {
                         startDate = tempDateToAdd;
                         i++;
                     } else {
-                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, endDate));
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
                         startDate = endDate.plusDays(1);
                         endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
                     }
@@ -209,7 +209,7 @@ public class Period {
                         startDate = tempDateToRemove;
                         i--;
                     } else {
-                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, endDate));
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
                         startDate = endDate.plusDays(1);
                         endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
                     }
