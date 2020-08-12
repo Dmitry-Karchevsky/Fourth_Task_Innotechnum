@@ -125,11 +125,11 @@ public class Period {
                 if (tempDateToAdd.equals(startDate)) {
                     i++;
                 } else if (tempDateToAdd.isAfter(startDate) && tempDateToAdd.isBefore(endDate.plusDays(1))) {
-                    periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, tempDateToAdd.minusDays(1)));
+                    periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, tempDateToAdd.minusDays(1)));
                     startDate = tempDateToAdd;
                     i++;
                 } else {
-                    periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, endDate));
+                    periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, endDate));
                     startDate = endDate.plusDays(1);
                     endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
                 }
@@ -189,7 +189,7 @@ public class Period {
                     if (tempDateToAdd.equals(startDate)) {
                         i++;
                     } else if (tempDateToAdd.isAfter(startDate) && tempDateToAdd.isBefore(endDate.plusDays(1))) {
-                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, tempDateToAdd.minusDays(1)));
+                        periodList.add(new Period(startDate.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, tempDateToAdd.minusDays(1)));
                         startDate = tempDateToAdd;
                         i++;
                     } else {
@@ -203,7 +203,7 @@ public class Period {
                         removePersonList.remove(0);
                         i--;
                     } else if (tempDateToRemove.isAfter(startDate) && tempDateToRemove.isBefore(endDate.plusDays(1))) {
-                        periodList.add(new Period(tempDateToRemove.getMonth(), getSalaryFromList(personList.subList(0, i + 1)), startDate, tempDateToRemove.minusDays(1)));
+                        periodList.add(new Period(tempDateToRemove.getMonth(), getSalaryFromList(personList.subList(0, i)), startDate, tempDateToRemove.minusDays(1)));
                         personList.remove(removePersonList.get(0));
                         removePersonList.remove(0);
                         startDate = tempDateToRemove;

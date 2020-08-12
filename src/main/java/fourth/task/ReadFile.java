@@ -61,7 +61,7 @@ public class ReadFile {
         return list;
     }
 
-    /*public static List<Object> readInfoInList(String fileName, Class className){
+    /*public static List readInfoInList(String fileName, Class className){
         List list = new ArrayList<>();
         String[] info;
         try (BufferedReader fileReader = new BufferedReader(new FileReader(fileName))){
